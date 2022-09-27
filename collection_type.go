@@ -12,8 +12,8 @@ const (
 type CTType int
 
 const (
-	CTTypeUser  = 0 // 认证用户
-	CTTypeGuest = 2 // 游客
+	CTTypeUser  CTType = 0 // 认证用户
+	CTTypeGuest CTType = 2 // 游客
 )
 
 // LoginTraceParam 用户行为数据上报请求参数
@@ -25,7 +25,7 @@ func (this *LoginTraceParam) Add(trace *LoginTrace) {
 	if trace == nil {
 		return
 	}
-	trace.No = int8(len(this.Collections) + 1)
+	trace.No = uint8(len(this.Collections) + 1)
 	this.Collections = append(this.Collections, trace)
 }
 
@@ -66,7 +66,7 @@ func (this *LoginTraceParam) AddGuestLogout(session string, opTime int64, device
 }
 
 type LoginTrace struct {
-	No int8   `json:"no"` // 在批量模式中标识一条行为数据，取值范围 1-128
+	No uint8  `json:"no"` // 在批量模式中标识一条行为数据，取值范围 1-128
 	SI string `json:"si"` // 长度 32， 一个会话标识只能对应唯一的实名用户，一个实名用户可以拥有多个会话标识；同一用户单次游戏会话中，上下线动作必须使用同一会话标识上报 备注：会话标识仅标识一次用户会话，生命周期仅为一次上线和与之匹配的一次下线，不会对生命周期之外的任何业务有任何影响
 	BT BTType `json:"bt"` // 游戏用户行为类型 0：下线 1：上线
 	OT int64  `json:"ot"` // 行为发生时间戳，单位秒
@@ -86,6 +86,6 @@ type LoginTraceData struct {
 }
 
 type LoginTraceResult struct {
-	No int8 `json:"no"`
+	No uint8 `json:"no"`
 	Error
 }
