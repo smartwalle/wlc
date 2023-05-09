@@ -41,26 +41,26 @@ func check(client wlc.TestClient, code string, ai, name, idNum string) {
 	p.AI = ai
 	p.Name = name
 	p.IdNum = idNum
-	var rsp, err = client.CheckTest(code, p)
+	var result, err = client.CheckTest(code, p)
 	if err != nil {
 		fmt.Println("实名认证发生错误:", err)
 		return
 	}
 
-	if rsp != nil && rsp.Data != nil && rsp.Data.Result != nil {
-		fmt.Println("实名认证结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
+	if result != nil {
+		fmt.Println("实名认证结果:", result.PI, result.Status)
 	}
 }
 
 func query(client wlc.TestClient, code string, ai string) {
-	var rsp, err = client.QueryTest(code, ai)
+	var result, err = client.QueryTest(code, ai)
 	if err != nil {
 		fmt.Println("实名认证查询发生错误:", err)
 		return
 	}
 
-	if rsp != nil && rsp.Data != nil && rsp.Data.Result != nil {
-		fmt.Println("实名认证查询结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
+	if result != nil {
+		fmt.Println("实名认证查询结果:", result.PI, result.Status)
 	}
 }
 
@@ -68,16 +68,14 @@ func loginTraceGuest(client wlc.TestClient, code string) {
 	var p = wlc.LoginTraceParam{}
 	p.AddGuestLogin("12345678901234567890123456789012", time.Now().Unix(), "12345678901234567890123456789012")
 
-	var rsp, err = client.LoginTraceTest(code, p)
+	var result, err = client.LoginTraceTest(code, p)
 	if err != nil {
 		fmt.Println("上报数据发生错误:", err)
 		return
 	}
 
-	if rsp != nil && rsp.Data != nil {
-		for _, result := range rsp.Data.Results {
-			fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
-		}
+	for _, result := range result {
+		fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
 	}
 }
 
@@ -85,15 +83,13 @@ func loginTraceUser(client wlc.TestClient, code string) {
 	var p = wlc.LoginTraceParam{}
 	p.AddUserLogin("12345678901234567890123456789012", time.Now().Unix(), "1fffbjzos82bs9cnyj1dna7d6d29zg4esnh99u")
 
-	var rsp, err = client.LoginTraceTest(code, p)
+	var result, err = client.LoginTraceTest(code, p)
 	if err != nil {
 		fmt.Println("上报数据发生错误:", err)
 		return
 	}
 
-	if rsp != nil && rsp.Data != nil {
-		for _, result := range rsp.Data.Results {
-			fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
-		}
+	for _, result := range result {
+		fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
 	}
 }

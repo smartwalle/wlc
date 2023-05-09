@@ -2,10 +2,6 @@ package wlc
 
 import "fmt"
 
-type Param struct {
-	Data string `json:"data"`
-}
-
 type Error struct {
 	ErrCode int    `json:"errcode"`
 	ErrMsg  string `json:"errmsg"`

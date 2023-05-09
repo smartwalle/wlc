@@ -1,7 +1,6 @@
 package wlc
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -10,24 +9,29 @@ const (
 	kLoginTraceTestURL = "https://wlc.nppa.gov.cn/test/collection/loginout/"
 )
 
-func (this *client) LoginTrace(param LoginTraceParam) (result *LoginTraceRsp, err error) {
-	data, err := this.request(http.MethodPost, kLoginTraceURL, nil, param)
-	if err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+func (this *client) LoginTrace(param LoginTraceParam) ([]*LoginTraceResult, error) {
+	return this.loginTrace(kLoginTraceURL, param)
 }
 
-func (this *client) LoginTraceTest(code string, param LoginTraceParam) (result *LoginTraceRsp, err error) {
-	data, err := this.request(http.MethodPost, kLoginTraceTestURL+code, nil, param)
-	if err != nil {
+func (this *client) LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error) {
+	return this.loginTrace(kLoginTraceTestURL+code, param)
+}
+
+func (this *client) loginTrace(api string, param LoginTraceParam) ([]*LoginTraceResult, error) {
+	var aux = struct {
+		*Error
+		Data struct {
+			Results []*LoginTraceResult `json:"results"`
+		} `json:"data"`
+	}{}
+
+	if err := this.request(http.MethodPost, api, nil, param, &aux); err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
+
+	if aux.Error != nil && aux.Error.ErrCode != 0 {
+		return aux.Data.Results, aux.Error
 	}
-	return result, nil
+
+	return aux.Data.Results, nil
 }

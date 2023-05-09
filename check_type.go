@@ -16,17 +16,7 @@ type CheckParam struct {
 	IdNum string `json:"idNum"` // 用户身份证号码
 }
 
-// CheckRsp 实名认证返回数据
-type CheckRsp struct {
-	Error
-	Data *CheckData `json:"data"`
-}
-
-type CheckData struct {
-	Result *CheckResult `json:"result"`
-}
-
-// CheckResult 实名认证结果
+// CheckResult 实名认证返回数据
 type CheckResult struct {
 	Status CheckStatus `json:"status"` // 认证结果
 	PI     string      `json:"pi"`     // 已通过实名认证用户的唯一标识

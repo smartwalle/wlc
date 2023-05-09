@@ -1,7 +1,6 @@
 package wlc
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -33,29 +32,29 @@ type Client interface {
 	// 沉迷实名认证系统的游戏运营单位提供服务，游戏运营单位调用
 	// 该接口进行用户实名认证工作，本版本仅支持大陆地区的姓名和
 	// 二代身份证号核实认证。
-	Check(param CheckParam) (result *CheckRsp, err error)
+	Check(param CheckParam) (*CheckResult, error)
 
 	// Query 实名认证结果查询接口,
 	// 网络游戏用户实名认证结果查询服务接口，面向已经提交用
 	// 户实名认证且没有返回结果的游戏运营单位提供服务，游戏运营
 	// 单位可以调用该接口，查询已经提交但未返回结果用户的实名认
 	// 证结果。
-	Query(ai string) (result *QueryRsp, err error)
+	Query(ai string) (*QueryResult, error)
 
 	// LoginTrace 游戏用户行为数据上报接口
 	// 游戏用户行为数据上报接口，面向已经接入网络游戏防沉迷
 	// 实名认证系统的游戏运营单位提供服务，游戏运营单位调用该接
 	// 口上报游戏用户上下线行为数据。
-	LoginTrace(param LoginTraceParam) (result *LoginTraceRsp, err error)
+	LoginTrace(param LoginTraceParam) ([]*LoginTraceResult, error)
 }
 
 // TestClient 接口测试辅助客户端
 type TestClient interface {
-	CheckTest(code string, param CheckParam) (result *CheckRsp, err error)
+	CheckTest(code string, param CheckParam) (*CheckResult, error)
 
-	QueryTest(code, ai string) (result *QueryRsp, err error)
+	QueryTest(code, ai string) (*QueryResult, error)
 
-	LoginTraceTest(code string, param LoginTraceParam) (result *LoginTraceRsp, err error)
+	LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error)
 }
 
 func New(appId, secretKey, bizId string) Client {
@@ -78,36 +77,35 @@ func NewTest(appId, secretKey, bizId string) TestClient {
 	return nClient
 }
 
-func (this *client) request(method, api string, values url.Values, param interface{}) ([]byte, error) {
+func (this *client) request(method, api string, values url.Values, param, result interface{}) error {
 	if values == nil {
 		values = url.Values{}
 	}
 
-	var payload string
-	var body io.Reader
+	var body string
 	if param != nil {
 		data, err := json.Marshal(param)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		// 加密请求参数
-		data, err = this.encrypt(this.secretKeyHex, data)
-		if err != nil {
-			return nil, err
+		if data, err = this.encrypt(this.secretKeyHex, data); err != nil {
+			return err
 		}
 
 		// 构造新的请求参数
-		var p = &Param{}
-		p.Data = base64.StdEncoding.EncodeToString(data)
-
-		data, err = json.Marshal(p)
-		if err != nil {
-			return nil, err
+		var payload = struct {
+			Data string `json:"data"`
+		}{
+			Data: base64.StdEncoding.EncodeToString(data),
 		}
 
-		payload = string(data)
-		body = bytes.NewReader(data)
+		if data, err = json.Marshal(payload); err != nil {
+			return err
+		}
+
+		body = string(data)
 	}
 
 	var nURL = api
@@ -115,9 +113,9 @@ func (this *client) request(method, api string, values url.Values, param interfa
 		nURL = api + "?" + values.Encode()
 	}
 
-	req, err := http.NewRequest(method, nURL, body)
+	req, err := http.NewRequest(method, nURL, strings.NewReader(body))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var now = strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
@@ -126,7 +124,7 @@ func (this *client) request(method, api string, values url.Values, param interfa
 	values.Add("bizId", this.bizId)
 	values.Add("timestamps", now)
 
-	var sign = this.sign(this.secretKey, values, payload)
+	var sign = this.sign(this.secretKey, values, body)
 
 	req.Header.Set("appId", this.appId)
 	req.Header.Set("bizId", this.bizId)
@@ -136,16 +134,15 @@ func (this *client) request(method, api string, values url.Values, param interfa
 
 	rsp, err := this.client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rsp.Body.Close()
 
-	result, err := io.ReadAll(rsp.Body)
-	if err != nil {
-		return nil, err
+	if err = json.NewDecoder(rsp.Body).Decode(result); err != nil {
+		return err
 	}
 
-	return result, nil
+	return nil
 }
 
 func (this *client) encrypt(secretKeyHex []byte, data []byte) ([]byte, error) {

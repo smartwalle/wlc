@@ -75,16 +75,7 @@ type LoginTrace struct {
 	PI string `json:"pi"` // 长度 38，已通过实名认证用户的唯一标识，已认证通过用户必填
 }
 
-// LoginTraceRsp 用户行为数据上报返回数据
-type LoginTraceRsp struct {
-	Error
-	Data *LoginTraceData `json:"data"`
-}
-
-type LoginTraceData struct {
-	Results []*LoginTraceResult `json:"results"`
-}
-
+// LoginTraceResult 用户行为数据上报返回数据
 type LoginTraceResult struct {
 	No uint8 `json:"no"`
 	Error

@@ -1,7 +1,6 @@
 package wlc
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 )
@@ -11,30 +10,32 @@ const (
 	kQueryTestURL = "https://wlc.nppa.gov.cn/test/authentication/query/"
 )
 
-func (this *client) Query(ai string) (result *QueryRsp, err error) {
-	var values = url.Values{}
-	values.Set("ai", ai)
-
-	data, err := this.request(http.MethodGet, kQueryURL, values, nil)
-	if err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+func (this *client) Query(ai string) (*QueryResult, error) {
+	return this.query(kQueryURL, ai)
 }
 
-func (this *client) QueryTest(code, ai string) (result *QueryRsp, err error) {
+func (this *client) QueryTest(code, ai string) (*QueryResult, error) {
+	return this.query(kQueryTestURL+code, ai)
+}
+
+func (this *client) query(api, ai string) (*QueryResult, error) {
+	var aux = struct {
+		*Error
+		Data struct {
+			Result *QueryResult `json:"result"`
+		} `json:"data"`
+	}{}
+
 	var values = url.Values{}
 	values.Set("ai", ai)
 
-	data, err := this.request(http.MethodGet, kQueryTestURL+code, values, nil)
-	if err != nil {
+	if err := this.request(http.MethodGet, api, values, nil, &aux); err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
+
+	if aux.Error != nil && aux.Error.ErrCode != 0 {
+		return nil, aux.Error
 	}
-	return result, nil
+
+	return aux.Data.Result, nil
 }

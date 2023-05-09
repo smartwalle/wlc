@@ -1,7 +1,6 @@
 package wlc
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -10,24 +9,29 @@ const (
 	kCheckTestURL = "https://wlc.nppa.gov.cn/test/authentication/check/"
 )
 
-func (this *client) Check(param CheckParam) (result *CheckRsp, err error) {
-	data, err := this.request(http.MethodPost, kCheckURL, nil, param)
-	if err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+func (this *client) Check(param CheckParam) (*CheckResult, error) {
+	return this.check(kCheckURL, param)
 }
 
-func (this *client) CheckTest(code string, param CheckParam) (result *CheckRsp, err error) {
-	data, err := this.request(http.MethodPost, kCheckTestURL+code, nil, param)
-	if err != nil {
+func (this *client) CheckTest(code string, param CheckParam) (*CheckResult, error) {
+	return this.check(kCheckTestURL+code, param)
+}
+
+func (this *client) check(api string, param CheckParam) (*CheckResult, error) {
+	var aux = struct {
+		*Error
+		Data struct {
+			Result *CheckResult `json:"result"`
+		} `json:"data"`
+	}{}
+
+	if err := this.request(http.MethodPost, api, nil, param, &aux); err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, err
+
+	if aux.Error != nil && aux.Error.ErrCode != 0 {
+		return nil, aux.Error
 	}
-	return result, nil
+
+	return aux.Data.Result, nil
 }
