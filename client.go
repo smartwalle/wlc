@@ -10,7 +10,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
@@ -60,23 +59,23 @@ type TestClient interface {
 }
 
 func New(appId, secretKey, bizId string) Client {
-	var c = &client{}
-	c.appId = appId
-	c.secretKey = secretKey
-	c.secretKeyHex, _ = hex.DecodeString(secretKey)
-	c.bizId = bizId
-	c.client = http.DefaultClient
-	return c
+	var nClient = &client{}
+	nClient.appId = appId
+	nClient.secretKey = secretKey
+	nClient.secretKeyHex, _ = hex.DecodeString(secretKey)
+	nClient.bizId = bizId
+	nClient.client = http.DefaultClient
+	return nClient
 }
 
 func NewTest(appId, secretKey, bizId string) TestClient {
-	var c = &client{}
-	c.appId = appId
-	c.secretKey = secretKey
-	c.secretKeyHex, _ = hex.DecodeString(secretKey)
-	c.bizId = bizId
-	c.client = http.DefaultClient
-	return c
+	var nClient = &client{}
+	nClient.appId = appId
+	nClient.secretKey = secretKey
+	nClient.secretKeyHex, _ = hex.DecodeString(secretKey)
+	nClient.bizId = bizId
+	nClient.client = http.DefaultClient
+	return nClient
 }
 
 func (this *client) request(method, api string, values url.Values, param interface{}) ([]byte, error) {
@@ -84,8 +83,8 @@ func (this *client) request(method, api string, values url.Values, param interfa
 		values = url.Values{}
 	}
 
-	var body string
-	var bodyReader io.Reader
+	var payload string
+	var body io.Reader
 	if param != nil {
 		data, err := json.Marshal(param)
 		if err != nil {
@@ -101,13 +100,14 @@ func (this *client) request(method, api string, values url.Values, param interfa
 		// 构造新的请求参数
 		var p = &Param{}
 		p.Data = base64.StdEncoding.EncodeToString(data)
+
 		data, err = json.Marshal(p)
 		if err != nil {
 			return nil, err
 		}
 
-		body = string(data)
-		bodyReader = bytes.NewReader(data)
+		payload = string(data)
+		body = bytes.NewReader(data)
 	}
 
 	var nURL = api
@@ -115,7 +115,7 @@ func (this *client) request(method, api string, values url.Values, param interfa
 		nURL = api + "?" + values.Encode()
 	}
 
-	req, err := http.NewRequest(method, nURL, bodyReader)
+	req, err := http.NewRequest(method, nURL, body)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (this *client) request(method, api string, values url.Values, param interfa
 	values.Add("bizId", this.bizId)
 	values.Add("timestamps", now)
 
-	var sign = this.sign(this.secretKey, values, body)
+	var sign = this.sign(this.secretKey, values, payload)
 
 	req.Header.Set("appId", this.appId)
 	req.Header.Set("bizId", this.bizId)
@@ -135,14 +135,12 @@ func (this *client) request(method, api string, values url.Values, param interfa
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	rsp, err := this.client.Do(req)
-	if rsp != nil && rsp.Body != nil {
-		defer rsp.Body.Close()
-	}
 	if err != nil {
 		return nil, err
 	}
+	defer rsp.Body.Close()
 
-	result, err := ioutil.ReadAll(rsp.Body)
+	result, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return nil, err
 	}

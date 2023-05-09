@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"github.com/smartwalle/wlc"
-	"log"
 	"time"
 )
 
@@ -43,24 +43,24 @@ func check(client wlc.TestClient, code string, ai, name, idNum string) {
 	p.IdNum = idNum
 	var rsp, err = client.CheckTest(code, p)
 	if err != nil {
-		log.Println("实名认证发生错误:", err)
+		fmt.Println("实名认证发生错误:", err)
 		return
 	}
 
 	if rsp != nil && rsp.Data != nil && rsp.Data.Result != nil {
-		log.Println("实名认证结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
+		fmt.Println("实名认证结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
 	}
 }
 
 func query(client wlc.TestClient, code string, ai string) {
 	var rsp, err = client.QueryTest(code, ai)
 	if err != nil {
-		log.Println("实名认证查询发生错误:", err)
+		fmt.Println("实名认证查询发生错误:", err)
 		return
 	}
 
 	if rsp != nil && rsp.Data != nil && rsp.Data.Result != nil {
-		log.Println("实名认证查询结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
+		fmt.Println("实名认证查询结果:", rsp.Data.Result.PI, rsp.Data.Result.Status)
 	}
 }
 
@@ -70,13 +70,13 @@ func loginTraceGuest(client wlc.TestClient, code string) {
 
 	var rsp, err = client.LoginTraceTest(code, p)
 	if err != nil {
-		log.Println("上报数据发生错误:", err)
+		fmt.Println("上报数据发生错误:", err)
 		return
 	}
 
 	if rsp != nil && rsp.Data != nil {
 		for _, result := range rsp.Data.Results {
-			log.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
+			fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
 		}
 	}
 }
@@ -87,13 +87,13 @@ func loginTraceUser(client wlc.TestClient, code string) {
 
 	var rsp, err = client.LoginTraceTest(code, p)
 	if err != nil {
-		log.Println("上报数据发生错误:", err)
+		fmt.Println("上报数据发生错误:", err)
 		return
 	}
 
 	if rsp != nil && rsp.Data != nil {
 		for _, result := range rsp.Data.Results {
-			log.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
+			fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
 		}
 	}
 }
