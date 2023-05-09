@@ -29,22 +29,22 @@ func (this *LoginTraceParam) Add(trace *LoginTrace) {
 	this.Collections = append(this.Collections, trace)
 }
 
-func (this *LoginTraceParam) AddUser(session string, bType BTType, opTime int64, identifier string) {
+func (this *LoginTraceParam) AddUser(session string, bType BTType, opTime int64, pi string) {
 	var t = &LoginTrace{}
 	t.SI = session
 	t.BT = bType
 	t.OT = opTime
 	t.CT = CTTypeUser
-	t.PI = identifier
+	t.PI = pi
 	this.Add(t)
 }
 
-func (this *LoginTraceParam) AddUserLogin(session string, opTime int64, identifier string) {
-	this.AddUser(session, BTTypeLogin, opTime, identifier)
+func (this *LoginTraceParam) AddUserLogin(session string, opTime int64, pi string) {
+	this.AddUser(session, BTTypeLogin, opTime, pi)
 }
 
-func (this *LoginTraceParam) AddUserLogout(session string, opTime int64, identifier string) {
-	this.AddUser(session, BTTypeLogout, opTime, identifier)
+func (this *LoginTraceParam) AddUserLogout(session string, opTime int64, pi string) {
+	this.AddUser(session, BTTypeLogout, opTime, pi)
 }
 
 func (this *LoginTraceParam) AddGuest(session string, bType BTType, opTime int64, device string) {

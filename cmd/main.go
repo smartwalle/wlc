@@ -30,10 +30,10 @@ func main() {
 	query(client, "", "300000000000000001")
 
 	// testcase07-游戏用户行为数据上报接口 - 游客
-	loginTraceGuest(client, "")
+	loginTraceGuest(client, "", "12345678901234567890123456789012", "12345678901234567890123456789012")
 
 	// testcase08-游戏用户行为数据上报接口 - 认证用户
-	loginTraceUser(client, "")
+	loginTraceUser(client, "", "12345678901234567890123456789012", "1fffbjzos82bs9cnyj1dna7d6d29zg4esnh99u")
 }
 
 func check(client wlc.TestClient, code string, ai, name, idNum string) {
@@ -64,9 +64,9 @@ func query(client wlc.TestClient, code string, ai string) {
 	}
 }
 
-func loginTraceGuest(client wlc.TestClient, code string) {
+func loginTraceGuest(client wlc.TestClient, code, session, device string) {
 	var p = wlc.LoginTraceParam{}
-	p.AddGuestLogin("12345678901234567890123456789012", time.Now().Unix(), "12345678901234567890123456789012")
+	p.AddGuestLogin(session, time.Now().Unix(), device)
 
 	var result, err = client.LoginTraceTest(code, p)
 	if err != nil {
@@ -79,9 +79,9 @@ func loginTraceGuest(client wlc.TestClient, code string) {
 	}
 }
 
-func loginTraceUser(client wlc.TestClient, code string) {
+func loginTraceUser(client wlc.TestClient, code, session, pi string) {
 	var p = wlc.LoginTraceParam{}
-	p.AddUserLogin("12345678901234567890123456789012", time.Now().Unix(), "1fffbjzos82bs9cnyj1dna7d6d29zg4esnh99u")
+	p.AddUserLogin(session, time.Now().Unix(), pi)
 
 	var result, err = client.LoginTraceTest(code, p)
 	if err != nil {
