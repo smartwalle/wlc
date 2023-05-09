@@ -74,8 +74,8 @@ func loginTraceGuest(client wlc.TestClient, code string) {
 		return
 	}
 
-	for _, result := range result {
-		fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
+	for _, item := range result {
+		fmt.Println("上报数据发生错误:", item.No, item.ErrCode, item.ErrMsg)
 	}
 }
 
@@ -89,7 +89,7 @@ func loginTraceUser(client wlc.TestClient, code string) {
 		return
 	}
 
-	for _, result := range result {
-		fmt.Println("上报数据发生错误:", result.No, result.ErrCode, result.ErrMsg)
+	for _, item := range result {
+		fmt.Println("上报数据发生错误:", item.No, item.ErrCode, item.ErrMsg)
 	}
 }
