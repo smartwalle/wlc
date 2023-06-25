@@ -2,6 +2,10 @@
 
 [https://wlc.nppa.gov.cn/fcm_company/index.html](https://wlc.nppa.gov.cn/fcm_company/index.html)
 
+## 帮助
+
+在集成的过程中有遇到问题，欢迎加 QQ 群 203357977 讨论。
+
 ### 初始化
 
 ```go
