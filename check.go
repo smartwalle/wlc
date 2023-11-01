@@ -9,15 +9,15 @@ const (
 	kCheckTestURL = "https://wlc.nppa.gov.cn/test/authentication/check/"
 )
 
-func (this *client) Check(param CheckParam) (*CheckResult, error) {
-	return this.check(kCheckURL, param)
+func (c *client) Check(param CheckParam) (*CheckResult, error) {
+	return c.check(kCheckURL, param)
 }
 
-func (this *client) CheckTest(code string, param CheckParam) (*CheckResult, error) {
-	return this.check(kCheckTestURL+code, param)
+func (c *client) CheckTest(code string, param CheckParam) (*CheckResult, error) {
+	return c.check(kCheckTestURL+code, param)
 }
 
-func (this *client) check(api string, param CheckParam) (*CheckResult, error) {
+func (c *client) check(api string, param CheckParam) (*CheckResult, error) {
 	var aux = struct {
 		*Error
 		Data struct {
@@ -25,7 +25,7 @@ func (this *client) check(api string, param CheckParam) (*CheckResult, error) {
 		} `json:"data"`
 	}{}
 
-	if err := this.request(http.MethodPost, api, nil, param, &aux); err != nil {
+	if err := c.request(http.MethodPost, api, nil, param, &aux); err != nil {
 		return nil, err
 	}
 

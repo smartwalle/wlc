@@ -77,7 +77,7 @@ func NewTest(appId, secretKey, bizId string) TestClient {
 	return nClient
 }
 
-func (this *client) request(method, api string, values url.Values, param, result interface{}) error {
+func (c *client) request(method, api string, values url.Values, param, result interface{}) error {
 	if values == nil {
 		values = url.Values{}
 	}
@@ -90,7 +90,7 @@ func (this *client) request(method, api string, values url.Values, param, result
 		}
 
 		// 加密请求参数
-		if data, err = this.encrypt(this.secretKeyHex, data); err != nil {
+		if data, err = c.encrypt(c.secretKeyHex, data); err != nil {
 			return err
 		}
 
@@ -120,19 +120,19 @@ func (this *client) request(method, api string, values url.Values, param, result
 
 	var now = strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
 
-	values.Add("appId", this.appId)
-	values.Add("bizId", this.bizId)
+	values.Add("appId", c.appId)
+	values.Add("bizId", c.bizId)
 	values.Add("timestamps", now)
 
-	var sign = this.sign(this.secretKey, values, body)
+	var sign = c.sign(c.secretKey, values, body)
 
-	req.Header.Set("appId", this.appId)
-	req.Header.Set("bizId", this.bizId)
+	req.Header.Set("appId", c.appId)
+	req.Header.Set("bizId", c.bizId)
 	req.Header.Set("timestamps", now)
 	req.Header.Set("sign", sign)
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
-	rsp, err := this.client.Do(req)
+	rsp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (this *client) request(method, api string, values url.Values, param, result
 	return nil
 }
 
-func (this *client) encrypt(secretKeyHex []byte, data []byte) ([]byte, error) {
+func (c *client) encrypt(secretKeyHex []byte, data []byte) ([]byte, error) {
 	var block, err = aes.NewCipher(secretKeyHex)
 	if err != nil {
 		return nil, err
@@ -164,7 +164,7 @@ func (this *client) encrypt(secretKeyHex []byte, data []byte) ([]byte, error) {
 	return mode.Seal(nonce, nonce, data, nil), nil
 }
 
-func (this *client) sign(secretKey string, values url.Values, body string) string {
+func (c *client) sign(secretKey string, values url.Values, body string) string {
 	var pList = make([]string, 0, 3+len(values))
 
 	for key := range values {

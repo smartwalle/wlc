@@ -9,15 +9,15 @@ const (
 	kLoginTraceTestURL = "https://wlc.nppa.gov.cn/test/collection/loginout/"
 )
 
-func (this *client) LoginTrace(param LoginTraceParam) ([]*LoginTraceResult, error) {
-	return this.loginTrace(kLoginTraceURL, param)
+func (c *client) LoginTrace(param LoginTraceParam) ([]*LoginTraceResult, error) {
+	return c.loginTrace(kLoginTraceURL, param)
 }
 
-func (this *client) LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error) {
-	return this.loginTrace(kLoginTraceTestURL+code, param)
+func (c *client) LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error) {
+	return c.loginTrace(kLoginTraceTestURL+code, param)
 }
 
-func (this *client) loginTrace(api string, param LoginTraceParam) ([]*LoginTraceResult, error) {
+func (c *client) loginTrace(api string, param LoginTraceParam) ([]*LoginTraceResult, error) {
 	var aux = struct {
 		*Error
 		Data struct {
@@ -25,7 +25,7 @@ func (this *client) loginTrace(api string, param LoginTraceParam) ([]*LoginTrace
 		} `json:"data"`
 	}{}
 
-	if err := this.request(http.MethodPost, api, nil, param, &aux); err != nil {
+	if err := c.request(http.MethodPost, api, nil, param, &aux); err != nil {
 		return nil, err
 	}
 

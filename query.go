@@ -10,15 +10,15 @@ const (
 	kQueryTestURL = "https://wlc.nppa.gov.cn/test/authentication/query/"
 )
 
-func (this *client) Query(ai string) (*QueryResult, error) {
-	return this.query(kQueryURL, ai)
+func (c *client) Query(ai string) (*QueryResult, error) {
+	return c.query(kQueryURL, ai)
 }
 
-func (this *client) QueryTest(code, ai string) (*QueryResult, error) {
-	return this.query(kQueryTestURL+code, ai)
+func (c *client) QueryTest(code, ai string) (*QueryResult, error) {
+	return c.query(kQueryTestURL+code, ai)
 }
 
-func (this *client) query(api, ai string) (*QueryResult, error) {
+func (c *client) query(api, ai string) (*QueryResult, error) {
 	var aux = struct {
 		*Error
 		Data struct {
@@ -29,7 +29,7 @@ func (this *client) query(api, ai string) (*QueryResult, error) {
 	var values = url.Values{}
 	values.Set("ai", ai)
 
-	if err := this.request(http.MethodGet, api, values, nil, &aux); err != nil {
+	if err := c.request(http.MethodGet, api, values, nil, &aux); err != nil {
 		return nil, err
 	}
 
