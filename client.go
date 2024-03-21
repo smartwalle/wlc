@@ -17,6 +17,16 @@ import (
 	"time"
 )
 
+type Option func(c *client)
+
+func WithHTTPClient(c *http.Client) Option {
+	return func(cc *client) {
+		if c != nil {
+			cc.client = c
+		}
+	}
+}
+
 type client struct {
 	appId        string
 	secretKey    string
@@ -57,23 +67,33 @@ type TestClient interface {
 	LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error)
 }
 
-func New(appId, secretKey, bizId string) Client {
+func New(appId, secretKey, bizId string, opts ...Option) Client {
 	var nClient = &client{}
 	nClient.appId = appId
 	nClient.secretKey = secretKey
 	nClient.secretKeyHex, _ = hex.DecodeString(secretKey)
 	nClient.bizId = bizId
 	nClient.client = http.DefaultClient
+	for _, opt := range opts {
+		if opt != nil {
+			opt(nClient)
+		}
+	}
 	return nClient
 }
 
-func NewTest(appId, secretKey, bizId string) TestClient {
+func NewTest(appId, secretKey, bizId string, opts ...Option) TestClient {
 	var nClient = &client{}
 	nClient.appId = appId
 	nClient.secretKey = secretKey
 	nClient.secretKeyHex, _ = hex.DecodeString(secretKey)
 	nClient.bizId = bizId
 	nClient.client = http.DefaultClient
+	for _, opt := range opts {
+		if opt != nil {
+			opt(nClient)
+		}
+	}
 	return nClient
 }
 
