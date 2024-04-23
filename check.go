@@ -1,6 +1,7 @@
 package wlc
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -9,15 +10,15 @@ const (
 	kCheckTestURL = "https://wlc.nppa.gov.cn/test/authentication/check/"
 )
 
-func (c *client) Check(param CheckParam) (*CheckResult, error) {
-	return c.check(kCheckURL, param)
+func (c *client) Check(ctx context.Context, param CheckParam) (*CheckResult, error) {
+	return c.check(ctx, kCheckURL, param)
 }
 
-func (c *client) CheckTest(code string, param CheckParam) (*CheckResult, error) {
-	return c.check(kCheckTestURL+code, param)
+func (c *client) CheckTest(ctx context.Context, code string, param CheckParam) (*CheckResult, error) {
+	return c.check(ctx, kCheckTestURL+code, param)
 }
 
-func (c *client) check(api string, param CheckParam) (*CheckResult, error) {
+func (c *client) check(ctx context.Context, api string, param CheckParam) (*CheckResult, error) {
 	var aux = struct {
 		*Error
 		Data struct {
@@ -25,7 +26,7 @@ func (c *client) check(api string, param CheckParam) (*CheckResult, error) {
 		} `json:"data"`
 	}{}
 
-	if err := c.request(http.MethodPost, api, nil, param, &aux); err != nil {
+	if err := c.request(ctx, http.MethodPost, api, nil, param, &aux); err != nil {
 		return nil, err
 	}
 

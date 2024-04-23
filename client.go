@@ -1,6 +1,7 @@
 package wlc
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -42,29 +43,29 @@ type Client interface {
 	// 沉迷实名认证系统的游戏运营单位提供服务，游戏运营单位调用
 	// 该接口进行用户实名认证工作，本版本仅支持大陆地区的姓名和
 	// 二代身份证号核实认证。
-	Check(param CheckParam) (*CheckResult, error)
+	Check(ctx context.Context, param CheckParam) (*CheckResult, error)
 
 	// Query 实名认证结果查询接口,
 	// 网络游戏用户实名认证结果查询服务接口，面向已经提交用
 	// 户实名认证且没有返回结果的游戏运营单位提供服务，游戏运营
 	// 单位可以调用该接口，查询已经提交但未返回结果用户的实名认
 	// 证结果。
-	Query(ai string) (*QueryResult, error)
+	Query(ctx context.Context, ai string) (*QueryResult, error)
 
 	// LoginTrace 游戏用户行为数据上报接口
 	// 游戏用户行为数据上报接口，面向已经接入网络游戏防沉迷
 	// 实名认证系统的游戏运营单位提供服务，游戏运营单位调用该接
 	// 口上报游戏用户上下线行为数据。
-	LoginTrace(param LoginTraceParam) ([]*LoginTraceResult, error)
+	LoginTrace(ctx context.Context, param LoginTraceParam) ([]*LoginTraceResult, error)
 }
 
 // TestClient 接口测试辅助客户端
 type TestClient interface {
-	CheckTest(code string, param CheckParam) (*CheckResult, error)
+	CheckTest(ctx context.Context, code string, param CheckParam) (*CheckResult, error)
 
-	QueryTest(code, ai string) (*QueryResult, error)
+	QueryTest(ctx context.Context, code, ai string) (*QueryResult, error)
 
-	LoginTraceTest(code string, param LoginTraceParam) ([]*LoginTraceResult, error)
+	LoginTraceTest(ctx context.Context, code string, param LoginTraceParam) ([]*LoginTraceResult, error)
 }
 
 func New(appId, secretKey, bizId string, opts ...Option) Client {
@@ -97,7 +98,7 @@ func NewTest(appId, secretKey, bizId string, opts ...Option) TestClient {
 	return nClient
 }
 
-func (c *client) request(method, api string, values url.Values, param, result interface{}) error {
+func (c *client) request(ctx context.Context, method, api string, values url.Values, param, result interface{}) error {
 	if values == nil {
 		values = url.Values{}
 	}
@@ -133,7 +134,7 @@ func (c *client) request(method, api string, values url.Values, param, result in
 		nURL = api + "?" + values.Encode()
 	}
 
-	req, err := http.NewRequest(method, nURL, strings.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, method, nURL, strings.NewReader(body))
 	if err != nil {
 		return err
 	}
