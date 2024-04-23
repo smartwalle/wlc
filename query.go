@@ -1,6 +1,7 @@
 package wlc
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 )
@@ -10,15 +11,15 @@ const (
 	kQueryTestURL = "https://wlc.nppa.gov.cn/test/authentication/query/"
 )
 
-func (c *client) Query(ai string) (*QueryResult, error) {
-	return c.query(kQueryURL, ai)
+func (c *client) Query(ctx context.Context, ai string) (*QueryResult, error) {
+	return c.query(ctx, kQueryURL, ai)
 }
 
-func (c *client) QueryTest(code, ai string) (*QueryResult, error) {
-	return c.query(kQueryTestURL+code, ai)
+func (c *client) QueryTest(ctx context.Context, code, ai string) (*QueryResult, error) {
+	return c.query(ctx, kQueryTestURL+code, ai)
 }
 
-func (c *client) query(api, ai string) (*QueryResult, error) {
+func (c *client) query(ctx context.Context, api, ai string) (*QueryResult, error) {
 	var aux = struct {
 		*Error
 		Data struct {
@@ -29,7 +30,7 @@ func (c *client) query(api, ai string) (*QueryResult, error) {
 	var values = url.Values{}
 	values.Set("ai", ai)
 
-	if err := c.request(http.MethodGet, api, values, nil, &aux); err != nil {
+	if err := c.request(ctx, http.MethodGet, api, values, nil, &aux); err != nil {
 		return nil, err
 	}
 
